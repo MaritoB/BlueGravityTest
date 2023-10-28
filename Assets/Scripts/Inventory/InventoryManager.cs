@@ -18,23 +18,41 @@ namespace BlueGravityTest
         [SerializeField] GameObject InventoryCamera;
         [SerializeField] TextMeshProUGUI GoldAmountText;
         [SerializeField] int goldAmount;
-        ItemController SelectedItem;
+        InventoryManager customerInventory;
 
         private void Awake()
         {
             Items = new List<ItemController>();
             InventoryItemsDictionary = new Dictionary<Item, ItemController>();
         }
-        public void EquipItem()
+        public void SetCustomer(InventoryManager aCustomer)
         {
-            outfitManager.EquipItem(SelectedItem.getItemData());
+            customerInventory = aCustomer;
+        }
+        public void EquipItem(Item aItem)
+        {
+            outfitManager.EquipItem(aItem);
         }
         public void UpdateGold()
         {
-            GoldAmountText.text = goldAmount.ToString(); 
+            GoldAmountText.text = goldAmount.ToString();
         }
-        public void ToggleInventoryOn()
+        public void ToggleInventoryOnToBuy()
         {
+            ListItemsToBuy();
+            InventoryCanvas.SetActive(true);
+            InventoryCamera.SetActive(true);
+        }
+        public void ToggleInventoryOnToEquip()
+        {
+            ListItemsToEquip();
+            InventoryCanvas.SetActive(true);
+            InventoryCamera.SetActive(true);
+        }
+        public void ToggleInventoryOnToSell()
+        {
+            UpdateGold();
+            ListItemsToSell();
             InventoryCanvas.SetActive(true);
             InventoryCamera.SetActive(true);
         }
@@ -48,7 +66,40 @@ namespace BlueGravityTest
             outfitManager.EquipItem(aItem);
 
         }
-
+        public void SellItem(Item aItem)
+        {
+            if (aItem == null)
+            {
+                return;
+            }
+            goldAmount += aItem.goldPrice;
+            UpdateGold();
+            Remove(aItem);
+            customerInventory.Add(aItem);
+            customerInventory.ListItemsToBuy();
+            ListItemsToSell(); 
+        }
+        public void TryToBuy(Item aItem)
+        {
+            if (aItem == null)
+            {
+                return;
+            }
+            if (aItem.goldPrice <= customerInventory.goldAmount)
+            {
+                customerInventory.goldAmount -= aItem.goldPrice;
+                customerInventory.UpdateGold() ;
+                Remove(aItem);
+                customerInventory.Add(aItem);
+                ListItemsToBuy();
+                customerInventory.ListItemsToSell();
+                
+            }
+            else
+            {
+                Debug.Log("Need More Gold to Buy");
+            }
+        }
         public void Add(Item item)
         {
             if (InventoryItemsDictionary.TryGetValue(item, out ItemController value))
@@ -61,8 +112,6 @@ namespace BlueGravityTest
                 Items.Add(newItem);
                 InventoryItemsDictionary.Add(item, newItem);
             }
-            ListItems();
-
         }
         public void Remove(Item item)
         {
@@ -76,7 +125,26 @@ namespace BlueGravityTest
                 }
             }
         }
-        public void ListItems()
+        public void ListItemsToEquip()
+        {
+            foreach (Transform item in ItemContent)
+            {
+                Destroy(item.gameObject);
+            }
+            foreach (var item in InventoryItemsDictionary)
+            {
+                //mejorable con object pool de InventoryItem
+                GameObject obj = Instantiate(InventoryItem, ItemContent);
+                var unitPrice = obj.transform.Find("UnitPrice").GetComponent<TextMeshProUGUI>();
+                var itemQuantity = obj.transform.Find("ItemQuantity").GetComponent<TextMeshProUGUI>();
+                var itemIcon = obj.transform.Find("ItemIcon").GetComponent<Image>();
+                obj.GetComponent<Button>().onClick.AddListener(delegate { outfitManager.EquipItem(item.Key);  });
+                itemQuantity.text = item.Value.GetStackSize().ToString();
+                unitPrice.text = item.Key.goldPrice.ToString();
+                itemIcon.sprite = item.Key.icon;
+            }
+        }
+        public void ListItemsToSell()
         {
             foreach (Transform item in ItemContent)
             {
@@ -88,7 +156,25 @@ namespace BlueGravityTest
                 var unitPrice = obj.transform.Find("UnitPrice").GetComponent<TextMeshProUGUI>();
                 var itemQuantity = obj.transform.Find("ItemQuantity").GetComponent<TextMeshProUGUI>();
                 var itemIcon = obj.transform.Find("ItemIcon").GetComponent<Image>();
-                obj.GetComponent<Button>().onClick.AddListener(delegate { SelectItemController(item.Key); });
+                obj.GetComponent<Button>().onClick.AddListener(delegate { SellItem(item.Key); });
+                itemQuantity.text = item.Value.GetStackSize().ToString();
+                unitPrice.text = item.Key.goldPrice.ToString();
+                itemIcon.sprite = item.Key.icon;
+            }
+        }
+        public void ListItemsToBuy()
+        {
+            foreach (Transform item in ItemContent)
+            {
+                Destroy(item.gameObject);
+            }
+            foreach (var item in InventoryItemsDictionary)
+            {
+                GameObject obj = Instantiate(InventoryItem, ItemContent);
+                var unitPrice = obj.transform.Find("UnitPrice").GetComponent<TextMeshProUGUI>();
+                var itemQuantity = obj.transform.Find("ItemQuantity").GetComponent<TextMeshProUGUI>();
+                var itemIcon = obj.transform.Find("ItemIcon").GetComponent<Image>();
+                obj.GetComponent<Button>().onClick.AddListener(delegate { TryToBuy(item.Key); });
                 itemQuantity.text = item.Value.GetStackSize().ToString();
                 unitPrice.text = item.Key.goldPrice.ToString();
                 itemIcon.sprite = item.Key.icon;
