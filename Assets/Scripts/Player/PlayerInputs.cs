@@ -15,7 +15,7 @@ namespace BlueGravityTest
             movementInputs.x = Input.GetAxis("Horizontal");
             movementInputs.y = Input.GetAxis("Vertical");
             sprintInput = Input.GetKey(KeyCode.LeftShift);
-            interact = Input.GetKey(KeyCode.F);
+            interact = Input.GetKeyDown(KeyCode.F);
         }
         public Vector2 GetInputMovement() { return movementInputs; }
         public bool GetInputSprint() { return sprintInput; }

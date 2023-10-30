@@ -1,12 +1,46 @@
 
 namespace BlueGravityTest
 {
+    using TMPro;
+    using UnityEngine;
+    using UnityEngine.UI;
 
-    [System.Serializable]
-    public class ItemController
+    public class ItemController : MonoBehaviour
     {
-        Item itemData;
-        int stackSize;
+        [SerializeField] TextMeshProUGUI unitPriceText;
+        [SerializeField] TextMeshProUGUI itemQuantityText;
+        [SerializeField] Image itemIcon;
+        [SerializeField] Button button;
+
+        ItemData itemData = null;
+        int stackSize = 0;
+        public void SetNewItemData(ItemData aItemData, int aStackSize)
+        {
+            itemData = aItemData;
+            stackSize = aStackSize;
+            UpdateItemControllerUI();
+
+        }
+        public Button GetButton()
+        {
+            return button;
+        }
+        public void UpdateItemControllerUI()
+        {
+            unitPriceText.text = itemData.goldPrice.ToString();
+            itemQuantityText.text = stackSize.ToString();
+            itemIcon.sprite = itemData.icon;
+        }
+        
+        public void ResetItemController()
+        {
+            itemData = null;
+            button.onClick.RemoveAllListeners();
+            unitPriceText.text = "#";
+            itemQuantityText.text = "#";
+            stackSize = 0;
+        }
+
         public int GetStackSize()
         {
             return stackSize;
@@ -19,12 +53,7 @@ namespace BlueGravityTest
         {
             stackSize--;
         }
-        public ItemController(Item aItemData)
-        {
-            itemData = aItemData;
-            addToStack();
-        }
-        public Item getItemData()
+        public ItemData GetItemData()
         {
             return itemData; 
         }

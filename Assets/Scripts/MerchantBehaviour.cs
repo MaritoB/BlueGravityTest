@@ -1,5 +1,6 @@
 
 using BlueGravityTest;
+using System.Collections;
 using UnityEngine;
 
 public interface ITrader
@@ -10,29 +11,37 @@ public class MerchantBehaviour : MonoBehaviour, ITrader, IInteractable
 {
     [SerializeField]GameObject mInteractionImage;
     [SerializeField] InventoryManager merchantInventory, playerInventory;
-    [SerializeField] Item[] itemsToSell;
+    [SerializeField] ItemData[] itemsToSell;
     public void HideInteractions()
     {
         mInteractionImage.SetActive(false);
         merchantInventory.ToggleInventoryOff();
-        if(playerInventory != null)
+        if (playerInventory != null)
         {
             playerInventory.ToggleInventoryOff();
         }
     }
-
-    private void Start()
+    IEnumerator AddItemToShop()
     {
+        yield return new WaitForSeconds(2f);
         foreach (var item in itemsToSell)
         {
             if (item != null)
             {
-                if(merchantInventory != null)
+                if (merchantInventory != null)
                 {
                     merchantInventory.Add(item);
                 }
             }
         }
+        merchantInventory.ListItemControllers();
+        merchantInventory.SetOnClickBuy();
+
+    }
+
+    private void Start()
+    {
+        StartCoroutine(AddItemToShop());
     }
     public void Interact()
     {
@@ -47,7 +56,6 @@ public class MerchantBehaviour : MonoBehaviour, ITrader, IInteractable
     public void StartTrade(InventoryManager aPlayerInventory)
     {
         playerInventory = aPlayerInventory;
-        merchantInventory.ListItemsToBuy();
         merchantInventory.ToggleInventoryOnToBuy();
         playerInventory.ToggleInventoryOnToSell();
         playerInventory.SetCustomer(merchantInventory);

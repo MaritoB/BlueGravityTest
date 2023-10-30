@@ -3,70 +3,57 @@ namespace BlueGravityTest
 {
     using System.Collections.Generic;
     using UnityEngine;
-    using UnityEngine.UI;
     using TMPro;
-    using UnityEngine.Events;
+    using static UnityEditor.Progress;
 
     public class InventoryManager : MonoBehaviour
     {
-        List<ItemController> Items;
-        Dictionary<Item, ItemController> InventoryItemsDictionary;
+        List<ItemController> ItemControllerPool;
+        List<ItemData> InventoryItemsList;
         [SerializeField] Transform ItemContent;
         [SerializeField] PlayerOutfitManager outfitManager;
-        [SerializeField] GameObject InventoryItem;
+        [SerializeField] GameObject ItemControllerPrefab;
         [SerializeField] GameObject InventoryCanvas;
         [SerializeField] GameObject InventoryCamera;
         [SerializeField] TextMeshProUGUI GoldAmountText;
         [SerializeField] int goldAmount;
         InventoryManager customerInventory;
 
-        private void Awake()
+        private void Start()
         {
-            Items = new List<ItemController>();
-            InventoryItemsDictionary = new Dictionary<Item, ItemController>();
+            ItemControllerPool = new List<ItemController>();
+            InventoryItemsList = new List<ItemData>();
+            
+            GameObject tmpItem;
+            for (int i = 0; i < 3; i++)
+            {
+                tmpItem = Instantiate(ItemControllerPrefab, ItemContent);
+                tmpItem.SetActive(false);
+                ItemControllerPool.Add(tmpItem.GetComponent<ItemController>());
+            }
         }
-        public void SetCustomer(InventoryManager aCustomer)
-        {
-            customerInventory = aCustomer;
-        }
-        public void EquipItem(Item aItem)
-        {
-            outfitManager.EquipItem(aItem);
-        }
-        public void UpdateGold()
-        {
-            GoldAmountText.text = goldAmount.ToString();
-        }
-        public void ToggleInventoryOnToBuy()
-        {
-            ListItemsToBuy();
-            InventoryCanvas.SetActive(true);
-            InventoryCamera.SetActive(true);
-        }
-        public void ToggleInventoryOnToEquip()
-        {
-            ListItemsToEquip();
-            InventoryCanvas.SetActive(true);
-            InventoryCamera.SetActive(true);
-        }
-        public void ToggleInventoryOnToSell()
-        {
-            UpdateGold();
-            ListItemsToSell();
-            InventoryCanvas.SetActive(true);
-            InventoryCamera.SetActive(true);
-        }
-        public void ToggleInventoryOff()
-        {
-            InventoryCanvas.SetActive(false);
-            InventoryCamera.SetActive(false);
-        }
-        public void SelectItemController(Item aItem)
-        {
-            outfitManager.EquipItem(aItem);
 
+        public ItemController AddItemControllerToPool()
+        {
+            GameObject tmpItem;
+            tmpItem = Instantiate(ItemControllerPrefab, ItemContent);
+            ItemController tempItemControllertmpItem = tmpItem.GetComponent<ItemController>();
+            tempItemControllertmpItem.ResetItemController();
+            ItemControllerPool.Add(tempItemControllertmpItem);
+            return tempItemControllertmpItem;
         }
-        public void SellItem(Item aItem)
+        public ItemController GetPooledItemController()
+        {
+            for (int i = 0; i < ItemControllerPool.Count; i++)
+            {
+                if (!ItemControllerPool[i].gameObject.activeSelf)
+                {
+                    return ItemControllerPool[i];
+                }
+            }
+            return AddItemControllerToPool(); ;
+        }
+        public void SellItem(ItemData aItem)
         {
             if (aItem == null)
             {
@@ -76,10 +63,12 @@ namespace BlueGravityTest
             UpdateGold();
             Remove(aItem);
             customerInventory.Add(aItem);
-            customerInventory.ListItemsToBuy();
-            ListItemsToSell(); 
+            ListItemControllers();
+            SetOnClickSell();
+            customerInventory.ListItemControllers();
+            customerInventory.SetOnClickBuy();
         }
-        public void TryToBuy(Item aItem)
+        public void TryToBuy(ItemData aItem)
         {
             if (aItem == null)
             {
@@ -91,40 +80,154 @@ namespace BlueGravityTest
                 customerInventory.UpdateGold() ;
                 Remove(aItem);
                 customerInventory.Add(aItem);
-                ListItemsToBuy();
-                customerInventory.ListItemsToSell();
-                
+                ListItemControllers();
+                SetOnClickBuy();
+                customerInventory.ListItemControllers();
+                customerInventory.SetOnClickSell();
             }
             else
             {
                 Debug.Log("Need More Gold to Buy");
             }
         }
-        public void Add(Item item)
+        public void Add(ItemData aItem)
         {
-            if (InventoryItemsDictionary.TryGetValue(item, out ItemController value))
+            if (InventoryItemsList == null || aItem == null)
             {
-                value.addToStack();
+                return;
+            }
+            InventoryItemsList.Add(aItem);
+            AddItemToItemController(aItem);
+        }
+        private void AddItemToItemController(ItemData aItem)
+        {
+            ItemController itemController = ItemControllerPool.Find(x => x.GetItemData() == aItem);
+            if (itemController != null)
+            {
+                itemController.addToStack();
+                itemController.gameObject.SetActive(true);
+                itemController.UpdateItemControllerUI();
             }
             else
             {
-                ItemController newItem = new ItemController(item);
-                Items.Add(newItem);
-                InventoryItemsDictionary.Add(item, newItem);
+                itemController = GetPooledItemController();
+                itemController.gameObject.SetActive(true);
+                itemController.SetNewItemData(aItem, 1);
             }
         }
-        public void Remove(Item item)
+        public void Remove(ItemData aItem)
         {
-            if (InventoryItemsDictionary.TryGetValue(item, out ItemController value))
+            if (InventoryItemsList == null || aItem == null)
             {
-                value.RemoveFromStack();
-                if (value.GetStackSize() == 0)
+                return;
+            }
+            InventoryItemsList.Remove(aItem);
+            ItemController itemController = ItemControllerPool.Find(x => x.GetItemData() == aItem);
+            if (itemController != null)
+            {
+                itemController.RemoveFromStack();
+                if (itemController.GetStackSize()<= 0)
                 {
-                    Items.Remove(value);
-                    InventoryItemsDictionary.Remove(item);
+                    itemController.ResetItemController();
+                    itemController.gameObject.SetActive(false);
                 }
             }
         }
+        public void ListItemControllers()
+        {
+            foreach (Transform itemCont in ItemContent)
+            {
+                itemCont.GetComponent<ItemController>().ResetItemController();
+                itemCont.gameObject.SetActive(false);
+            }
+            foreach (var item in InventoryItemsList)
+            {
+                AddItemToItemController(item);
+            }
+        }
+        public void SetOnClickEquip()
+        {
+            
+            foreach (var itemController in ItemControllerPool)
+            {
+                ItemData itemData = itemController.GetItemData();
+                if (itemController.gameObject.activeSelf && itemData != null)
+                {
+                    itemController.GetButton().onClick.RemoveAllListeners();
+                    itemController.GetButton().onClick.AddListener(delegate { outfitManager.EquipItem(itemData); });
+                }
+
+            }
+        }
+        public void SetOnClickBuy()
+        {
+          
+            foreach (var itemController in ItemControllerPool)
+            {
+                ItemData itemData = itemController.GetItemData();
+                if (itemController.gameObject.activeSelf && itemData != null)
+                {
+                    itemController.GetButton().onClick.RemoveAllListeners();
+                    itemController.GetButton().onClick.AddListener(delegate { TryToBuy(itemData); });
+                }
+            }
+        }
+        public void SetOnClickSell()
+        {
+            
+            foreach (var itemController in ItemControllerPool)
+            {
+                ItemData itemData = itemController.GetItemData();
+                if (itemController.gameObject.activeSelf && itemData != null)
+                {
+                    itemController.GetButton().onClick.RemoveAllListeners();
+                    itemController.GetButton().onClick.AddListener(delegate { SellItem(itemData); });
+                }
+            }
+        }
+
+            public void SetCustomer(InventoryManager aCustomer)
+            {
+                customerInventory = aCustomer;
+            }
+            public void EquipItem(ItemData aItem)
+            {
+                outfitManager.EquipItem(aItem);
+            }
+            public void UpdateGold()
+            {
+                GoldAmountText.text = goldAmount.ToString();
+            }
+            public void ToggleInventoryOnToBuy()
+            {
+                ListItemControllers();
+                SetOnClickBuy();
+                InventoryCanvas.SetActive(true);
+                InventoryCamera.SetActive(true);
+            }
+            public void ToggleInventoryOnToEquip()
+        {
+                UpdateGold();
+                ListItemControllers();
+                SetOnClickEquip();
+                InventoryCanvas.SetActive(true);
+                InventoryCamera.SetActive(true);
+            }
+            public void ToggleInventoryOnToSell()
+            {
+                UpdateGold();
+                ListItemControllers();
+                SetOnClickSell();
+                InventoryCanvas.SetActive(true);
+                InventoryCamera.SetActive(true);
+            }
+            public void ToggleInventoryOff()
+            {
+                InventoryCanvas.SetActive(false);
+                InventoryCamera.SetActive(false);
+            }
+
+        /*
         public void ListItemsToEquip()
         {
             foreach (Transform item in ItemContent)
@@ -146,13 +249,13 @@ namespace BlueGravityTest
         }
         public void ListItemsToSell()
         {
-            foreach (Transform item in ItemContent)
+            foreach (Transform itemCont in ItemContent)
             {
-                Destroy(item.gameObject);
+                Destroy(itemCont.gameObject);
             }
             foreach (var item in InventoryItemsDictionary)
             {
-                GameObject obj = Instantiate(InventoryItem, ItemContent);
+                GameObject obj = Instantiate(ItemControllerPrefab, ItemContent);
                 var unitPrice = obj.transform.Find("UnitPrice").GetComponent<TextMeshProUGUI>();
                 var itemQuantity = obj.transform.Find("ItemQuantity").GetComponent<TextMeshProUGUI>();
                 var itemIcon = obj.transform.Find("ItemIcon").GetComponent<Image>();
@@ -162,6 +265,7 @@ namespace BlueGravityTest
                 itemIcon.sprite = item.Key.icon;
             }
         }
+
         public void ListItemsToBuy()
         {
             foreach (Transform item in ItemContent)
@@ -170,7 +274,7 @@ namespace BlueGravityTest
             }
             foreach (var item in InventoryItemsDictionary)
             {
-                GameObject obj = Instantiate(InventoryItem, ItemContent);
+                GameObject obj = Instantiate(ItemControllerPrefab, ItemContent);
                 var unitPrice = obj.transform.Find("UnitPrice").GetComponent<TextMeshProUGUI>();
                 var itemQuantity = obj.transform.Find("ItemQuantity").GetComponent<TextMeshProUGUI>();
                 var itemIcon = obj.transform.Find("ItemIcon").GetComponent<Image>();
@@ -180,5 +284,41 @@ namespace BlueGravityTest
                 itemIcon.sprite = item.Key.icon;
             }
         }
+
+    public void ListItemsToBuy()
+    {
+
+        foreach (Transform itemCont in ItemContent)
+        {
+            itemCont.gameObject.SetActive(false);
+        }
+        ItemController itemController = null;
+        foreach (var item in InventoryItemsList)
+        {
+            itemController = GetPooledItemController();
+            itemController.gameObject.SetActive(true);
+            itemController.SetNewItemData(item.Key, item.Value.GetStackSize());
+            itemController.GetButton().onClick.RemoveAllListeners();
+            itemController.GetButton().onClick.AddListener(delegate { TryToBuy(item.Key); });
+        }
+    }
+    public void ListItemsToSell()
+        {
+
+            foreach (Transform itemCont in ItemContent)
+            {
+                itemCont.gameObject.SetActive(false);
+            }
+            ItemController itemController = null;
+            foreach (var item in InventoryItemsList)
+            {
+                itemController = GetPooledItemController();
+                itemController.gameObject.SetActive(true);
+                itemController.SetNewItemData(item.Key, item.Value.GetStackSize());
+                itemController.GetButton().onClick.RemoveAllListeners();
+                itemController.GetButton().onClick.AddListener(delegate { SellItem(item.Key); });
+            }
+        }
+          */
     }
 }

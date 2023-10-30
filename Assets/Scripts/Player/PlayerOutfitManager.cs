@@ -8,7 +8,7 @@ namespace BlueGravityTest
         SpriteRenderer HoodRenderer, TorsoRenderer, PelvisRenderer, ShoulderRRenderer, ShoulderLRenderer,
                                         ElbowRRenderer, ElbowLRenderer, WristRRenderer, WristLRenderer,
                                         LegRRenderer, LegLRenderer, BootRRenderer, BootLRenderer;
-        public void EquipItem(Item aItem)
+        public void EquipItem(ItemData aItem)
         {
             if (aItem == null)
             {

@@ -6,7 +6,7 @@ namespace BlueGravityTest
 
     public class ItemPickUp : MonoBehaviour
     {
-        [SerializeField] Item mItem;
+        [SerializeField] ItemData mItem;
         SpriteRenderer sprite;
         private void Start()
         {
@@ -18,12 +18,8 @@ namespace BlueGravityTest
             inventory.Add(mItem);
             gameObject.SetActive(false);
         }
-        private void OnMouseDown()
-        {
-        }
         private void OnTriggerEnter2D(Collider2D collision)
         {
-            Debug.Log("TryPick");
             InventoryManager inventory = collision.GetComponentInChildren<InventoryManager>();
             if (inventory != null) 
             {
@@ -32,7 +28,6 @@ namespace BlueGravityTest
                     PickUp(inventory);
                 }
             }
-
         }
     }
 }

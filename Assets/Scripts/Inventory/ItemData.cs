@@ -21,7 +21,7 @@ namespace BlueGravityTest
     }
 
     [CreateAssetMenu(menuName = "Inventory Item Data")]
-    public class Item : ScriptableObject
+    public class ItemData : ScriptableObject
     {
         public string id;
         public ItemType itemType;

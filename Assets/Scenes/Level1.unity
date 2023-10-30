@@ -3755,11 +3755,13 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 73e88f32f84833e41b1a9b1d2ccd7265, type: 2}
   - {fileID: 11400000, guid: 88bfd817b560cdb4fb51f35649e6fc5b, type: 2}
   - {fileID: 11400000, guid: 9f78f8356928ebc488adc20991dd301e, type: 2}
+  - {fileID: 11400000, guid: 6e03dc785b47f764bb096f67bc5cd038, type: 2}
   - {fileID: 11400000, guid: 41939c80c47c2f744936fc6c4c5a2b27, type: 2}
   - {fileID: 11400000, guid: c8af817f0b8ddb2498db05f4097ba069, type: 2}
   - {fileID: 11400000, guid: 7e5ab27bb0feac94385b7242c20a5dfb, type: 2}
   - {fileID: 11400000, guid: f0597e6d040a76e48bc1de0df79fbef4, type: 2}
   - {fileID: 11400000, guid: 98fc3b41e6343124bb28bb7612e74c40, type: 2}
+  - {fileID: 11400000, guid: 7ce29a73a6c3ff04c98833ab27237a94, type: 2}
   - {fileID: 11400000, guid: 706db0fdb1cad094aa35867c5290c0f2, type: 2}
   - {fileID: 11400000, guid: c180a7f6e232f9244a040839bc51b6f1, type: 2}
   - {fileID: 11400000, guid: f0f8363a402d62641a891d7fe6b18984, type: 2}
@@ -4695,7 +4697,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f57e41bc7828d334fbafee15fc2c2485, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mItem: {fileID: 11400000, guid: 7e5ab27bb0feac94385b7242c20a5dfb, type: 2}
+  mItem: {fileID: 11400000, guid: f0f8363a402d62641a891d7fe6b18984, type: 2}
 --- !u!4 &970005764
 Transform:
   m_ObjectHideFlags: 0
@@ -6270,7 +6272,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f57e41bc7828d334fbafee15fc2c2485, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mItem: {fileID: 11400000, guid: 7ab6216521a57d34fa36bd53bad097b9, type: 2}
+  mItem: {fileID: 11400000, guid: 9f78f8356928ebc488adc20991dd301e, type: 2}
 --- !u!4 &2055217691
 Transform:
   m_ObjectHideFlags: 0
@@ -6390,7 +6392,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ItemContent: {fileID: 6630789234203019419}
   outfitManager: {fileID: 0}
-  InventoryItem: {fileID: 304667409649216284, guid: 60169f4dd5f1a9b40884ef4e77a32197,
+  ItemControllerPrefab: {fileID: 304667409649216284, guid: 8f68e53fa475fc348b3f51a9ee218806,
     type: 3}
   InventoryCanvas: {fileID: 6630789233539330218}
   InventoryCamera: {fileID: 1791606485}
@@ -6579,6 +6581,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_text
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2200890523853659934, guid: e316087d1be9e4d46a6512cbb32628ba,
+        type: 3}
+      propertyPath: goldAmount
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 2200890523853659934, guid: e316087d1be9e4d46a6512cbb32628ba,
         type: 3}

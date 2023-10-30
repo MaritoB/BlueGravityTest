@@ -11,15 +11,10 @@ namespace BlueGravityTest
         IInteractable interactable;
         private void OnTriggerStay2D(Collider2D collision)
         {
-            if (interactable != null && mInputs != null && mInputs.GetInputInteract())
+            ITrader trader = collision.GetComponent<ITrader>();
+            if (trader != null && Input.GetKeyDown(KeyCode.F))
             {
-                //interactable.Interact();
-                ITrader trader = collision.GetComponent<ITrader>();
-                if(trader != null)
-                {
-                    trader.StartTrade(GetComponentInChildren<InventoryManager>());
-
-                }
+                trader.StartTrade(GetComponentInChildren<InventoryManager>());
 
             }
         }
