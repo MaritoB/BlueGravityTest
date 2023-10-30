@@ -1,10 +1,9 @@
 
 namespace BlueGravityTest
 {
-    using System.Collections.Generic;
-    using UnityEngine;
     using TMPro;
-    using static UnityEditor.Progress;
+    using UnityEngine;
+    using System.Collections.Generic;
 
     public class InventoryManager : MonoBehaviour
     {
@@ -23,7 +22,7 @@ namespace BlueGravityTest
         {
             ItemControllerPool = new List<ItemController>();
             InventoryItemsList = new List<ItemData>();
-            
+
             GameObject tmpItem;
             for (int i = 0; i < 3; i++)
             {
@@ -77,7 +76,7 @@ namespace BlueGravityTest
             if (aItem.goldPrice <= customerInventory.goldAmount)
             {
                 customerInventory.goldAmount -= aItem.goldPrice;
-                customerInventory.UpdateGold() ;
+                customerInventory.UpdateGold();
                 Remove(aItem);
                 customerInventory.Add(aItem);
                 ListItemControllers();
@@ -126,7 +125,7 @@ namespace BlueGravityTest
             if (itemController != null)
             {
                 itemController.RemoveFromStack();
-                if (itemController.GetStackSize()<= 0)
+                if (itemController.GetStackSize() <= 0)
                 {
                     itemController.ResetItemController();
                     itemController.gameObject.SetActive(false);
@@ -147,7 +146,7 @@ namespace BlueGravityTest
         }
         public void SetOnClickEquip()
         {
-            
+
             foreach (var itemController in ItemControllerPool)
             {
                 ItemData itemData = itemController.GetItemData();
@@ -161,7 +160,7 @@ namespace BlueGravityTest
         }
         public void SetOnClickBuy()
         {
-          
+
             foreach (var itemController in ItemControllerPool)
             {
                 ItemData itemData = itemController.GetItemData();
@@ -174,7 +173,7 @@ namespace BlueGravityTest
         }
         public void SetOnClickSell()
         {
-            
+
             foreach (var itemController in ItemControllerPool)
             {
                 ItemData itemData = itemController.GetItemData();
@@ -186,139 +185,46 @@ namespace BlueGravityTest
             }
         }
 
-            public void SetCustomer(InventoryManager aCustomer)
-            {
-                customerInventory = aCustomer;
-            }
-            public void EquipItem(ItemData aItem)
-            {
-                outfitManager.EquipItem(aItem);
-            }
-            public void UpdateGold()
-            {
-                GoldAmountText.text = goldAmount.ToString();
-            }
-            public void ToggleInventoryOnToBuy()
-            {
-                ListItemControllers();
-                SetOnClickBuy();
-                InventoryCanvas.SetActive(true);
-                InventoryCamera.SetActive(true);
-            }
-            public void ToggleInventoryOnToEquip()
+        public void SetCustomer(InventoryManager aCustomer)
         {
-                UpdateGold();
-                ListItemControllers();
-                SetOnClickEquip();
-                InventoryCanvas.SetActive(true);
-                InventoryCamera.SetActive(true);
-            }
-            public void ToggleInventoryOnToSell()
-            {
-                UpdateGold();
-                ListItemControllers();
-                SetOnClickSell();
-                InventoryCanvas.SetActive(true);
-                InventoryCamera.SetActive(true);
-            }
-            public void ToggleInventoryOff()
-            {
-                InventoryCanvas.SetActive(false);
-                InventoryCamera.SetActive(false);
-            }
-
-        /*
-        public void ListItemsToEquip()
-        {
-            foreach (Transform item in ItemContent)
-            {
-                Destroy(item.gameObject);
-            }
-            foreach (var item in InventoryItemsDictionary)
-            {
-                //mejorable con object pool de InventoryItem
-                GameObject obj = Instantiate(InventoryItem, ItemContent);
-                var unitPrice = obj.transform.Find("UnitPrice").GetComponent<TextMeshProUGUI>();
-                var itemQuantity = obj.transform.Find("ItemQuantity").GetComponent<TextMeshProUGUI>();
-                var itemIcon = obj.transform.Find("ItemIcon").GetComponent<Image>();
-                obj.GetComponent<Button>().onClick.AddListener(delegate { outfitManager.EquipItem(item.Key);  });
-                itemQuantity.text = item.Value.GetStackSize().ToString();
-                unitPrice.text = item.Key.goldPrice.ToString();
-                itemIcon.sprite = item.Key.icon;
-            }
+            customerInventory = aCustomer;
         }
-        public void ListItemsToSell()
+        public void EquipItem(ItemData aItem)
         {
-            foreach (Transform itemCont in ItemContent)
-            {
-                Destroy(itemCont.gameObject);
-            }
-            foreach (var item in InventoryItemsDictionary)
-            {
-                GameObject obj = Instantiate(ItemControllerPrefab, ItemContent);
-                var unitPrice = obj.transform.Find("UnitPrice").GetComponent<TextMeshProUGUI>();
-                var itemQuantity = obj.transform.Find("ItemQuantity").GetComponent<TextMeshProUGUI>();
-                var itemIcon = obj.transform.Find("ItemIcon").GetComponent<Image>();
-                obj.GetComponent<Button>().onClick.AddListener(delegate { SellItem(item.Key); });
-                itemQuantity.text = item.Value.GetStackSize().ToString();
-                unitPrice.text = item.Key.goldPrice.ToString();
-                itemIcon.sprite = item.Key.icon;
-            }
+            outfitManager.EquipItem(aItem);
         }
-
-        public void ListItemsToBuy()
+        public void UpdateGold()
         {
-            foreach (Transform item in ItemContent)
-            {
-                Destroy(item.gameObject);
-            }
-            foreach (var item in InventoryItemsDictionary)
-            {
-                GameObject obj = Instantiate(ItemControllerPrefab, ItemContent);
-                var unitPrice = obj.transform.Find("UnitPrice").GetComponent<TextMeshProUGUI>();
-                var itemQuantity = obj.transform.Find("ItemQuantity").GetComponent<TextMeshProUGUI>();
-                var itemIcon = obj.transform.Find("ItemIcon").GetComponent<Image>();
-                obj.GetComponent<Button>().onClick.AddListener(delegate { TryToBuy(item.Key); });
-                itemQuantity.text = item.Value.GetStackSize().ToString();
-                unitPrice.text = item.Key.goldPrice.ToString();
-                itemIcon.sprite = item.Key.icon;
-            }
+            GoldAmountText.text = goldAmount.ToString();
         }
-
-    public void ListItemsToBuy()
-    {
-
-        foreach (Transform itemCont in ItemContent)
+        public void ToggleInventoryOnToBuy()
         {
-            itemCont.gameObject.SetActive(false);
+            ListItemControllers();
+            SetOnClickBuy();
+            InventoryCanvas.SetActive(true);
+            InventoryCamera.SetActive(true);
         }
-        ItemController itemController = null;
-        foreach (var item in InventoryItemsList)
+        public void ToggleInventoryOnToEquip()
         {
-            itemController = GetPooledItemController();
-            itemController.gameObject.SetActive(true);
-            itemController.SetNewItemData(item.Key, item.Value.GetStackSize());
-            itemController.GetButton().onClick.RemoveAllListeners();
-            itemController.GetButton().onClick.AddListener(delegate { TryToBuy(item.Key); });
+            UpdateGold();
+            ListItemControllers();
+            SetOnClickEquip();
+            InventoryCanvas.SetActive(true);
+            InventoryCamera.SetActive(true);
+        }
+        public void ToggleInventoryOnToSell()
+        {
+            UpdateGold();
+            ListItemControllers();
+            SetOnClickSell();
+            InventoryCanvas.SetActive(true);
+            InventoryCamera.SetActive(true);
+        }
+        public void ToggleInventoryOff()
+        {
+            InventoryCanvas.SetActive(false);
+            InventoryCamera.SetActive(false);
         }
     }
-    public void ListItemsToSell()
-        {
 
-            foreach (Transform itemCont in ItemContent)
-            {
-                itemCont.gameObject.SetActive(false);
-            }
-            ItemController itemController = null;
-            foreach (var item in InventoryItemsList)
-            {
-                itemController = GetPooledItemController();
-                itemController.gameObject.SetActive(true);
-                itemController.SetNewItemData(item.Key, item.Value.GetStackSize());
-                itemController.GetButton().onClick.RemoveAllListeners();
-                itemController.GetButton().onClick.AddListener(delegate { SellItem(item.Key); });
-            }
-        }
-          */
-    }
 }

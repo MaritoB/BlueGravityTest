@@ -1,7 +1,6 @@
 
 namespace BlueGravityTest
 {
-
     using UnityEngine;
     public enum ItemType
     {

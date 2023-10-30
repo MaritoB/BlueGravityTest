@@ -1,64 +1,61 @@
 
-using BlueGravityTest;
-using System.Collections;
-using UnityEngine;
-
-public interface ITrader
+namespace BlueGravityTest
 {
-    void StartTrade(InventoryManager aPlayerInventory);
-}
-public class MerchantBehaviour : MonoBehaviour, ITrader, IInteractable
-{
-    [SerializeField]GameObject mInteractionImage;
-    [SerializeField] InventoryManager merchantInventory, playerInventory;
-    [SerializeField] ItemData[] itemsToSell;
-    public void HideInteractions()
+    using UnityEngine;
+    using System.Collections;
+    public interface ITrader
     {
-        mInteractionImage.SetActive(false);
-        merchantInventory.ToggleInventoryOff();
-        if (playerInventory != null)
-        {
-            playerInventory.ToggleInventoryOff();
-        }
+        void StartTrade(InventoryManager aPlayerInventory);
     }
-    IEnumerator AddItemToShop()
+    public class MerchantBehaviour : MonoBehaviour, ITrader, IInteractable
     {
-        yield return new WaitForSeconds(2f);
-        foreach (var item in itemsToSell)
+        [SerializeField] GameObject mInteractionImage;
+        [SerializeField] InventoryManager merchantInventory, playerInventory;
+        [SerializeField] ItemData[] itemsToSell;
+        public void HideInteractions()
         {
-            if (item != null)
+            mInteractionImage.SetActive(false);
+            merchantInventory.ToggleInventoryOff();
+            if (playerInventory != null)
             {
-                if (merchantInventory != null)
-                {
-                    merchantInventory.Add(item);
-                }
+                playerInventory.ToggleInventoryOff();
             }
         }
-        merchantInventory.ListItemControllers();
-        merchantInventory.SetOnClickBuy();
-
-    }
-
-    private void Start()
-    {
-        StartCoroutine(AddItemToShop());
-    }
-    public void Interact()
-    {
-        merchantInventory.ToggleInventoryOnToBuy();
-    }
-
-    public void ShowInteractions()
-    {
-        mInteractionImage.SetActive(true);
-    }
-
-    public void StartTrade(InventoryManager aPlayerInventory)
-    {
-        playerInventory = aPlayerInventory;
-        merchantInventory.ToggleInventoryOnToBuy();
-        playerInventory.ToggleInventoryOnToSell();
-        playerInventory.SetCustomer(merchantInventory);
-        merchantInventory.SetCustomer(playerInventory);
+        IEnumerator AddItemToShop()
+        {
+            yield return new WaitForSeconds(2f);
+            foreach (var item in itemsToSell)
+            {
+                if (item != null)
+                {
+                    if (merchantInventory != null)
+                    {
+                        merchantInventory.Add(item);
+                    }
+                }
+            }
+            merchantInventory.ListItemControllers();
+            merchantInventory.SetOnClickBuy();
+        }
+        private void Start()
+        {
+            StartCoroutine(AddItemToShop());
+        }
+        public void Interact()
+        {
+            merchantInventory.ToggleInventoryOnToBuy();
+        }
+        public void ShowInteractions()
+        {
+            mInteractionImage.SetActive(true);
+        }
+        public void StartTrade(InventoryManager aPlayerInventory)
+        {
+            playerInventory = aPlayerInventory;
+            merchantInventory.ToggleInventoryOnToBuy();
+            playerInventory.ToggleInventoryOnToSell();
+            playerInventory.SetCustomer(merchantInventory);
+            merchantInventory.SetCustomer(playerInventory);
+        }
     }
 }
