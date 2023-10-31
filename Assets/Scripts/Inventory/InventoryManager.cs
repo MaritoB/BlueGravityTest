@@ -195,7 +195,7 @@ namespace BlueGravityTest
         }
         public void UpdateGold()
         {
-            GoldAmountText.text = goldAmount.ToString();
+            GoldAmountText.text = "$ " + goldAmount.ToString();
         }
         public void ToggleInventoryOnToBuy()
         {
